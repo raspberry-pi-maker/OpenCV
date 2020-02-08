@@ -8,7 +8,7 @@ angular_velocity = np.degrees(np.pi)    # I'll make 1 rotation per 2 seconds
 step_angle = angular_velocity / FPS
 step_radian = np.radians(step_angle)
 max_count = 3
-def process_eye(base, mask, pos):
+def process_masking(base, mask, pos):
     h, w, c = mask.shape
     hb, wb, _ = base.shape
     x = pos[0]
