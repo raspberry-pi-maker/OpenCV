@@ -8,12 +8,31 @@ angular_velocity = np.degrees(np.pi)    # I'll make 1 rotation per 2 seconds
 step_angle = angular_velocity / FPS
 step_radian = np.radians(step_angle)
 max_count = 3
-def process_masking(base, mask, pos):
+def process_eye(base, mask, pos):
     h, w, c = mask.shape
+    hb, wb, _ = base.shape
     x = pos[0]
     y = pos[1]
+
+    #check mask position
+    if(x > wb or y > hb):
+        print(' invalid overlay position(%d,%d)'%(x, y))
+        return None
+    
+    #remove alpha channel    
     if c == 4:
         mask = cv2.cvtColor(mask, cv2.COLOR_BGRA2BGR) 
+    
+    #adjust mask
+    if(x + w > wb):
+        mask = mask[:, 0:wb - x]
+        print(' mask X size adjust[W:%d] -> [W:%d]'%(w, wb - x))
+    if(y + h > hb):
+        mask = mask[0:hb - y, :]
+        print(' mask Y size adjust[H:%d] -> [H:%d]'%(h, hb - y))
+
+    h, w, c = mask.shape
+    
     img = base.copy()
     bg = img[y:y+h, x:x+w]      #overlay area
     try:
@@ -27,7 +46,7 @@ def process_masking(base, mask, pos):
                     bg[i][j][1] = G
                     bg[i][j][2] = R
         img[y:y+h, x:x+w] = bg
-    except IndexError:
+    except IndexError:  #index (i, j) is out of the screen resolution.  (화면 범위를 벗어남.)
         print(' index Error')
         return None
     return img
