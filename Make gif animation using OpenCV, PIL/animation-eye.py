@@ -67,7 +67,7 @@ def process_masking(base, mask, pos):
     return img
 
 
-def draw_eyeball(lx, ly, rx, ry):   #left eye POS, right eye POS
+def draw_eyeball(lx, ly, rx, ry):   #left eye POS, right eye POS (left, top position)
     img = img2.copy()
     img = process_masking(img, left_eye, (lx, ly))
     if img is None:
