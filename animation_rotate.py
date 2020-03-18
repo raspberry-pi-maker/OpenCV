@@ -5,7 +5,7 @@ import time
 
 FPS = 30
 angular_velocity = np.degrees(np.pi)    # I'll make 1 rotation per 2 seconds
-step_angle = angular_velocity / FPS
+step_angle = (angular_velocity / FPS) 1.0
 step_radian = np.radians(step_angle)
 max_count = 3
 def process_masking(base, mask, pos):
@@ -72,7 +72,7 @@ out_video = cv2.VideoWriter('./animation.mp4', fourcc, 30, (c_width, c_height))
 
 
 angle = step_angle
-x_pos = c_width - width
+x_pos = (c_width - width) * 1.0
 count = 0
 
 while count < max_count:
@@ -81,16 +81,16 @@ while count < max_count:
     s = time.time()
     angle += step_angle
     if(angle > 360):
-        angle = 0
+        angle = angle % 360.0
 
-    print('x_pos:%d'%(x_pos))
-    img = process_masking(canvas, rotate, (x_pos,0))
+    print('x_pos:%f'%(x_pos))
+    img = process_masking(canvas, rotate, (int(x_pos),0))
     x_pos -= int(step_radian * height / 2 )
-    print('x_pos:%d'%(x_pos))
+    print('x_pos:%f'%(x_pos))
     out_video.write(img)
     cv2.imshow('rotate', img)
     if(x_pos < count * width):
-        x_pos = c_width - width
+        x_pos = (c_width - width) * 1.0
         count += 1
         canvas = img.copy()
     k = cv2.waitKey(1)
