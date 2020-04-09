@@ -14,7 +14,7 @@ lmargin = 20
 rmargin = 20
 margin = 20
 bmargin = 20
-r = 100
+r = 130
 arm_length = int(r * 0.9)
 circle_thickness = 2
 arm_thickness = 15
@@ -265,7 +265,8 @@ while all(result) == False:
 
     rad = np.radians(index * 90 / frames)
 
-    sleep_tm = (SLEEP - (time.time() - start)) * 1000 * (0.5 + 2 * math.sin(rad))
+    # sleep_tm = (SLEEP - (time.time() - start)) * 1000 * (0.5 + 2 * math.sin(rad))
+    sleep_tm = (SLEEP - (time.time() - start)) * 1000 * (0.5 + 2 * (index / frames))
     cv2.imshow("digit [%02d:%02d]"%(now.hour, now.minute), tcanvas)
     # print('[%d] sleep:%f'%(i, sleep_tm))
     cv2.waitKey(max(1, int(sleep_tm)))
