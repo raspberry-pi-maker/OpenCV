@@ -1,3 +1,9 @@
+'''
+Number       : 10 pixel height
+Character    :  8 pixel height
+Total Height : 16 pixel height
+'''
+
 import numpy as np
 import cv2
 import time
@@ -981,7 +987,10 @@ mychars = (a33, a34, a35, a36, a37, a38, a39, a40, a41, a42, a43, a44, a45, a46,
     a71, a72, a73, a74, a75, a76, a77, a78, a79, a80, a81, a82, a83, a84, a85, a86, a87, a88, a89, a90 )
 scale = 20
 x_shift = 2
-y_shift = 1
+bottom_shift = 1
+CHAR_HEIGHT = 16
+CHAR_WIDTH = 6
+CHAR_KERNING = 2
 
 def get_tetris_num(n):
     return mynums[n]
@@ -992,6 +1001,19 @@ def get_tetris_char(ascii):
         return None
     return mychars[n - 33]
 
+
+
+def set_pixel(tcanvas, x, x1, x2, y, y1, y2, color, y_pos):
+    ret = False
+    height, width, _ = tcanvas.shape
+    for i in range(x + x1*scale, x + x2*scale):
+        for j in range(y + y1*scale, y + y2*scale):
+            if(i < width and j < height):
+                tcanvas[j, i] = color
+            if j == (y_pos - 1):
+                ret = True
+    return ret
+
 '''
 Don't make shape, just paint the pixel.
 rotate:  %4 => 0 ~ 3 
@@ -999,329 +1021,122 @@ rotate:  %4 => 0 ~ 3
 def draw_shape(canvas, x, y, color, shape, rotate, y_pos):
     tcanvas = canvas.copy()
     rot = rotate % 4
-    ret = False
+    ret1 = False
+    ret2 = False
     if shape == 0:  #rantangle
         if rot == 0 or rot == 1 or rot == 2 or rot == 3:
-            for i in range(x, x + 2*scale):
-                for j in range(y + 0*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 2, y, 0, 2, color, y_pos)
     elif shape == 1: 
         if rot == 3:
-            for i in range(x + 2*scale, x + 3*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x , x + 3*scale):
-                for j in range(y + 2*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 2, 3, y, 1, 2, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 3, y, 2, 3, color, y_pos)
         elif rot == 0:
-            for i in range(x , x + 1*scale):
-                for j in range(y, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y + 2*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 0, 3, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 2, 3, color, y_pos)
         elif rot == 1:
-            for i in range(x , x + 3*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x, x + 1*scale):
-                for j in range(y + 2*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 3, y, 1, 2, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 1, y, 2, 3, color, y_pos)
         elif rot == 2:
-            for i in range(x , x + 2*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y + 2*scale, y + 4*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 2, y, 1, 2, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 2, 4, color, y_pos)
     elif shape == 2: 
         if rot == 1:
-            for i in range(x, x + 1*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x , x + 3*scale):
-                for j in range(y + 2*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 1, 2, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 3, y, 2, 3, color, y_pos)
         elif rot == 2:
-            for i in range(x, x + 2*scale):
-                for j in range(y + 0*scale, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x , x + 1*scale):
-                for j in range(y + 0*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 2, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 1, y, 0, 3, color, y_pos)
         elif rot == 3:
-            for i in range(x, x + 3*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 2*scale , x + 3*scale):
-                for j in range(y + 2*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 3, y, 1, 2, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 2, 3, y, 2, 3, color, y_pos)
         elif rot == 0:
-            for i in range(x, x + 1*scale):
-                for j in range(y + 2*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale , x + 2*scale):
-                for j in range(y, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 2, 3, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 0, 3, color, y_pos)
 
     elif shape == 3:
         if rot == 0 or rot == 2:
-            for i in range(x, x + 4*scale):
-                for j in range(y + 2*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 4, y, 2, 3, color, y_pos)
         elif rot == 1 or rot == 3:
-            for i in range(x, x + 1*scale):
-                for j in range(y, y + 4*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 0, 4, color, y_pos)
     elif shape == 4:
         if rot == 0:
-            for i in range(x, x + 1*scale):
-                for j in range(y, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y + 1*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 0, 2, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 1, 3, color, y_pos)
         elif rot == 1:
-            for i in range(x + 1*scale, x + 3*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x , x + 2*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 1, 3, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 2, y, 1, 2, color, y_pos)
         elif rot == 2:
-            for i in range(x, x + 1*scale):
-                for j in range(y, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale , x + 2*scale):
-                for j in range(y + 1*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 0, 2, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 1, 3, color, y_pos)
         elif rot == 3:
-            for i in range(x + 1*scale, x + 3*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x, x + 2*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 1, 3, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 2, y, 1, 2, color, y_pos)
 
     elif shape == 5:
         if rot == 0:
-            for i in range(x, x + 1*scale):
-                for j in range(y + 1*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 1, 3, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 0, 2, color, y_pos)
         elif rot == 1:
-            for i in range(x, x + 2*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 3*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 2, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 3, y, 1, 2, color, y_pos)
         elif rot == 2:
-            for i in range(x, x + 1*scale):
-                for j in range(y + 1*scale, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 1, 3, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 0, 2, color, y_pos)
         elif rot == 3:
-            for i in range(x, x + 2*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 3*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 2, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 3, y, 1, 2, color, y_pos)
 
     elif shape == 6:
         if rot == 0:
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x, x + 3*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 1, 2, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 3, y, 1, 2, color, y_pos)
         elif rot == 1:
-            for i in range(x, x + 1*scale):
-                for j in range(y, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 0, 3, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 1, 2, color, y_pos)
         elif rot == 2:
-            for i in range(x, x + 3*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 3, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 1, 2, color, y_pos)
         elif rot == 3:
-            for i in range(x, x + 1*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y, y + 3*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 1, 2, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 0, 3, color, y_pos)
 
 
     elif shape == 7:
         if rot == 0:
-            for i in range(x, x + 1*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x, x + 2*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 1, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 2, y, 1, 2, color, y_pos)
         elif rot == 1:
-            for i in range(x, x + 2*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x, x + 1*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 2, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 1, y, 1, 2, color, y_pos)
         elif rot == 2:
-            for i in range(x, x + 2*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 0, 2, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 1, 2, y, 1, 2, color, y_pos)
         elif rot == 3:
-            for i in range(x + 1*scale, x + 2*scale):
-                for j in range(y, y + 1*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
-            for i in range(x, x + 2*scale):
-                for j in range(y + 1*scale, y + 2*scale):
-                    tcanvas[j, i] = color
-                    if j == (y_pos - 1):
-                        ret = True
+            ret1 = set_pixel(tcanvas, x, 1, 2, y, 0, 1, color, y_pos)
+            ret2 = set_pixel(tcanvas, x, 0, 2, y, 1, 2, color, y_pos)
+    return tcanvas, (ret1 or ret2) 
 
 
-
-
-    return tcanvas, ret
-
-def animate_char(canvas, ascii, x_sh,  y_sh):
+def animate_char(canvas, ascii, xpos,  ypos):
     tcanvas = canvas.copy()
     val = get_tetris_char(ascii)
     if val is None:
         print(' No tetris value for %s'%(ascii))
         return canvas
-    return animate(tcanvas, val, x_sh,  y_sh)
+    return animate(tcanvas, val, xpos,  ypos)
 
-def animate_number(canvas, n, x_sh,  y_sh):
+def animate_number(canvas, n, xpos,  ypos):
     tcanvas = canvas.copy()
     num = get_tetris_num(n)
-    return animate(tcanvas, num, x_shift,  y_shift)
+    return animate(tcanvas, num, xpos,  ypos)
 
-def animate(tcanvas, val, x_sh,  y_sh):
+def animate(tcanvas, val, xpos,  ypos):
     for i in val:
         print(i)
         shape = i[0]
         color = myCOLORS[i[1]]
-        x_pos = i[2] + x_sh
-        y_pos = i[3] - y_sh
+        x_pos = i[2] + xpos
+        y_pos = i[3] + ypos - bottom_shift
         rotation = i[4]
         y = 0
         rot = 0
@@ -1334,20 +1149,19 @@ def animate(tcanvas, val, x_sh,  y_sh):
             im_pil = Image.fromarray(rgb)
             gif_frames.append(im_pil)
 
-            cv2.waitKey(30)
+            cv2.waitKey(20)
             y += 1
             if rot != rotation:
                 rot += 1
             if ret == True:
                 break    
         tcanvas = mycanvas.copy()
-        cv2.waitKey(100)
+        cv2.waitKey(60)
     return mycanvas
 
 
 
 def make_canvas(h, w, color):
-    # canvas = np.zeros([(h + 1) * scale,(w + 1) * scale,3], dtype=np.uint8)
     canvas = np.zeros([(h ) * scale,(w ) * scale,3], dtype=np.uint8)
     canvas.fill(color)
     return canvas
@@ -1355,26 +1169,44 @@ def make_canvas(h, w, color):
 def set_scale(s):
     global scale
     scale = s
- 
+
+def set_bottom_shift(s):
+    global bottom_shift
+    bottom_shift = s
+
 
 if __name__ == '__main__':
     set_scale(10)
-    canvas = make_canvas(16 * int(scale / 20 + 0.5), 32 * int(scale / 4 + 0.5), 0)
+    set_bottom_shift(1)
+    # canvas = make_canvas(16 * int(scale / 20 + 0.5), 32 * int(scale / 4 + 0.5), 0)
+    # canvas = make_canvas(80 + 2, 80 + 2 , 0)
+    canvas = make_canvas(CHAR_HEIGHT * 3, (CHAR_WIDTH + CHAR_KERNING) * 10  , 0)
     # test_shape()
     tcanv = canvas
     shift = x_shift + 4
 
-    # tcanv = animate_char(tcanv, "C",  shift , y_shift)
 
-    # str = "ABCDEFGHIJK"
-    # for i in str:
-    #     tcanv = animate_char(tcanv, i,  shift , y_shift)
-    #     shift += 11
-
-    str = "LMNOPQRSTUV"
+    str = "MAKERS"
+    xpos = (CHAR_WIDTH + CHAR_KERNING) * 2
+    ypos = CHAR_HEIGHT * 2
     for i in str:
-        tcanv = animate_char(tcanv, i,  shift , y_shift)
-        shift += 11
+        tcanv = animate_char(tcanv, i,  xpos , ypos)
+        xpos += (CHAR_WIDTH + CHAR_KERNING)
+
+    str = "FOR"
+    xpos = (CHAR_WIDTH + CHAR_KERNING) * 4
+    ypos = CHAR_HEIGHT
+    for i in str:
+        tcanv = animate_char(tcanv, i,  xpos , ypos)
+        xpos += (CHAR_WIDTH + CHAR_KERNING)
+
+    str = "RASPBERRY"
+    xpos = x_shift
+    ypos = 0
+    for i in str:
+        tcanv = animate_char(tcanv, i,  xpos , ypos)
+        xpos += (CHAR_WIDTH + CHAR_KERNING)
+
 
     # save_gif(gif_frames, "f:\\tmp\\tetris_char.gif", 50)
     cv2.waitKey(0)
